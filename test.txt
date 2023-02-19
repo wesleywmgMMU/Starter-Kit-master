@@ -1,0 +1,23 @@
+Alien Life: 100 
+Alien Attack: 0 
+Zombies No: 0 1 2 3 
+Zombies Life: 10 10 10 10 
+Zombies Attack: 15 15 15 10 
+Zombies Range: 3 2 2 1 
+Row: 5
+Column: 9
+Alien position x: 2
+Alien position y: 4
+Zombie Position: 
+00
+34
+10
+06
+
+2D Array: 
+1p>^<v4pp
+3>   phvr
+><h^A~rh>
+^@^v2 h p
+<h>hrr@ p
+

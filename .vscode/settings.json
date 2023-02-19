@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "iostream": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "limits": "cpp",
+        "ostream": "cpp",
+        "climits": "cpp",
+        "cctype": "cpp",
+        "ctime": "cpp",
+        "cstdlib": "cpp",
+        "*.tcc": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
