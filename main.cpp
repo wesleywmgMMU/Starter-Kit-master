@@ -102,11 +102,16 @@ public:
     };
 };
 
-void save(Character::Alien &aliens, Character::Zombie &zombies, int &column, int &row, string **arr, int **PositionZombie, int x, int y, string saveFileName) // Allow user to save their gameplay.
+//save and load
+
+void save(Character::Alien &aliens, Character::Zombie &zombies, string &mode, int &column, int &row, string **arr, int **PositionZombie, int x, int y, bool &bossSpawn, string saveFileName)
 {
     // Alien.
     ofstream file;
     file.open(saveFileName);
+    file << "Mode: ";
+    file << mode << " ";
+    file << endl;
     file << "Alien Life: ";
     file << aliens.getLife(0) << " ";
     file << endl;
@@ -137,6 +142,18 @@ void save(Character::Alien &aliens, Character::Zombie &zombies, int &column, int
     {
         file << zombies.getRange(i) << " ";
     }
+    file << endl;
+    file << "Boss life: ";
+    file << zombies.getBossLife(0) << " ";
+    file << endl;
+    file << "Boss attack: ";
+    file << zombies.getBossAttack(0) << " ";
+    file << endl;
+    file << "Boss CD: ";
+    file << zombies.getBossCD(0) << " ";
+    file << endl;
+    file << "Boss spawn: ";
+    file << bossSpawn << " ";
     file << endl;
     file << "Row: ";
     file << row << endl;
@@ -169,20 +186,42 @@ void save(Character::Alien &aliens, Character::Zombie &zombies, int &column, int
     file.close();
 }
 
-int getSavedAlienLife(string loadFileName) // Get alien life from loaded file.
+string getSavedMode(string loadFileName)
 {
-    int savedAlienLife;
+    string savedMode;
     ifstream file;
     file.open(loadFileName);
     string line;
     while (getline(file, line))
     {
-        if (line.find("Alien Life: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Mode: ") != string::npos) // Finds for Alien Life.
+        {
+            line = line.substr(6);   // Remove the first 12 char and save to line
+            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            int n;
+            while (iss >> n)
+            {
+                savedMode = n;
+            }
+        }
+    }
+    return savedMode;
+}
+
+int getSavedAlienLife(string loadFileName) // Get alien life from loaded file.
+{
+    int savedAlienLife;
+    ifstream file; //creates a file object
+    file.open(loadFileName);
+    string line;
+    while (getline(file, line))
+    {
+        if (line.find("Alien Life: ") != string::npos) // Execute if Alien LIfe: is found
         {
             line = line.substr(12);  // Remove the first 12 char and save to line
             istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
             int n;
-            while (iss >> n)
+            while (iss >> n) // while all integers are extracted, savedAlienLife = n;
             {
                 savedAlienLife = n;
             }
@@ -194,15 +233,15 @@ int getSavedAlienLife(string loadFileName) // Get alien life from loaded file.
 int getSavedAlienAttack(string loadFileName) // Get alien attack from loaded file.
 {
     int savedAlienAttack;
-    ifstream file; // Create a file object.
+    ifstream file; 
     file.open(loadFileName);
     string line;
     while (getline(file, line))
     {
-        if (line.find("Alien Attack: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Alien Attack: ") != string::npos) 
         {
-            line = line.substr(14);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(14);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -216,15 +255,15 @@ int getSavedAlienAttack(string loadFileName) // Get alien attack from loaded fil
 int getSavedAlienPositionX(string loadFileName) // Get alien position X from loaded file.
 {
     int savedAlienPositionX;
-    ifstream file; // Create a file object.
+    ifstream file; 
     file.open(loadFileName);
     string line;
     while (getline(file, line))
     {
-        if (line.find("Alien position x: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Alien position x: ") != string::npos) 
         {
-            line = line.substr(18);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(18);  
+            istringstream iss(line);
             int n;
             while (iss >> n)
             {
@@ -238,15 +277,15 @@ int getSavedAlienPositionX(string loadFileName) // Get alien position X from loa
 int getSavedAlienPositionY(string loadFileName) // Get alien position Y from loaded file.
 {
     int savedAlienPositionY;
-    ifstream file; // Create a file object.
+    ifstream file; 
     file.open(loadFileName);
     string line;
     while (getline(file, line))
     {
-        if (line.find("Alien position y: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Alien position y: ") != string::npos) 
         {
-            line = line.substr(18);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(18);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -266,14 +305,14 @@ vector<int> getSavedZombieNo(string loadFileName) // Get zombie count from loade
     string line;
     while (getline(file, line))
     {
-        if (line.find("Zombies No: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Zombies No: ") != string::npos)
         {
-            line = line.substr(12);  // Remove the first 12 char and save to line
+            line = line.substr(12);  
             istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
             int n;
             while (iss >> n)
             {
-                savedZombieNo.push_back(n);
+                savedZombieNo.push_back(n); // each n integer is pushed back into the savedZombieNo
             }
         }
     }
@@ -288,10 +327,10 @@ vector<int> getSavedZombieLife(string loadFileName) // Get zombie life from load
     string line;
     while (getline(file, line))
     {
-        if (line.find("Zombies Life: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Zombies Life: ") != string::npos) 
         {
-            line = line.substr(14);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(14);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -310,10 +349,10 @@ vector<int> getSavedZombieAttack(string loadFileName) // Get zombie attack from 
     string line;
     while (getline(file, line))
     {
-        if (line.find("Zombies Attack: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Zombies Attack: ") != string::npos) 
         {
-            line = line.substr(16);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(16);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -332,10 +371,10 @@ vector<int> getSavedZombieRange(string loadFileName) // Get zombie range from lo
     string line;
     while (getline(file, line))
     {
-        if (line.find("Zombies Range: ") != string::npos) // Finds for Alien Life.
+        if (line.find("Zombies Range: ") != string::npos) 
         {
-            line = line.substr(15);  // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(15);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -346,6 +385,94 @@ vector<int> getSavedZombieRange(string loadFileName) // Get zombie range from lo
     return savedZombieRange;
 }
 
+bool getSavedBossSpawn(string loadFileName)
+{
+    int savedBossSpawn;
+    ifstream file; // Create a file object.
+    file.open(loadFileName);
+    string line;
+    while (getline(file, line))
+    {
+        if (line.find("Boss spawn: ") != string::npos) // Finds for Alien Life.
+        {
+            line = line.substr(12);  // Remove the first 12 char and save to line
+            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            int n;
+            while (iss >> n)
+            {
+                savedBossSpawn = n;
+            }
+        }
+    }
+    return savedBossSpawn;
+}
+
+vector<int> getSavedBossLife(string loadFileName)
+{
+    vector<int> savedBossLife;
+    ifstream file; // Create a file object.
+    file.open(loadFileName);
+    string line;
+    while (getline(file, line))
+    {
+        if (line.find("Boss life: ") != string::npos) // Finds for Alien Life.
+        {
+            line = line.substr(11);  // Remove the first 12 char and save to line
+            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            int n;
+            while (iss >> n)
+            {
+                savedBossLife.push_back(n);
+            }
+        }
+    }
+    return savedBossLife;
+}
+
+vector<int> getSavedBossAttack(string loadFileName)
+{
+    vector<int> savedBossAttack;
+    ifstream file; // Create a file object.
+    file.open(loadFileName);
+    string line;
+    while (getline(file, line))
+    {
+        if (line.find("Boss attack: ") != string::npos) // Finds for Alien Life.
+        {
+            line = line.substr(13);  // Remove the first 12 char and save to line
+            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            int n;
+            while (iss >> n)
+            {
+                savedBossAttack.push_back(n);
+            }
+        }
+    }
+    return savedBossAttack;
+}
+
+vector<int> getSavedBossCD(string loadFileName)
+{
+    vector<int> savedBossCD;
+    ifstream file; // Create a file object.
+    file.open(loadFileName);
+    string line;
+    while (getline(file, line))
+    {
+        if (line.find("Boss CD: ") != string::npos) // Finds for Alien Life.
+        {
+            line = line.substr(9);   // Remove the first 12 char and save to line
+            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            int n;
+            while (iss >> n)
+            {
+                savedBossCD.push_back(n);
+            }
+        }
+    }
+    return savedBossCD;
+}
+
 int getSavedRow(string loadFileName) // Get row from loaded file.
 {
     int savedRow;
@@ -354,10 +481,10 @@ int getSavedRow(string loadFileName) // Get row from loaded file.
     string line;
     while (getline(file, line))
     {
-        if (line.find("Row: ") != string::npos) // finds for Alien Life:
+        if (line.find("Row: ") != string::npos) 
         {
-            line = line.substr(5);   // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(5);   
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -377,10 +504,10 @@ int getSavedColumn(string loadFileName) // Get column from loaded file.
     string line;
     while (getline(file, line))
     {
-        if (line.find("Column: ") != string::npos) // finds for Alien Life:
+        if (line.find("Column: ") != string::npos) 
         {
-            line = line.substr(8);   // Remove the first 12 char and save to line
-            istringstream iss(line); // It creates an object of the "istringstream" class, which is used to extract integers from the "line" string, one at a time. The ">>" operator is used to extract each integer and store it in the "n" variable.
+            line = line.substr(8);  
+            istringstream iss(line); 
             int n;
             while (iss >> n)
             {
@@ -449,7 +576,7 @@ int **getSavedPositionZombie(string filename) // Get zombie postion from loaded 
                 }
 
                 int zombiePositionsSize = zombiePositions.size();
-                newArray = new int *[zombiePositionsSize];
+                newArray = new int *[zombiePositionsSize]; //creates a newArray dynamically with the size of zombiePosition
                 for (int i = 0; i < zombiePositionsSize; i++)
                 {
                     newArray[i] = new int[2];
@@ -463,6 +590,55 @@ int **getSavedPositionZombie(string filename) // Get zombie postion from loaded 
     return newArray;
 }
 
+//customisations and initialisations
+
+string difficulty() // Menu for user to choose difficulty.
+{
+    string mode;
+    bool error = false;
+    do
+    {
+        cout << "                   Difficulty                  " << endl
+             << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+        // cout << "Easy      -- Alien revive 30 health when the Boss is spawned," << endl
+        //      << "             Boss has lower attack and normal health" << endl << endl;
+        // cout << "Medium    -- Alien's life deducted into 30 when the Boss is spawned," << endl
+        //      << "             Boss has normal attack and health." << endl << endl;
+        // cout << "Hard      -- Alien's life deducted into 1 when the Boss is spawned," << endl
+        //      << "             Zombies have higher attack and life." << endl
+        //      << "             Boss has very high attack and higher life." << endl << endl;
+        // cout << "Nightmare -- Alien's life deducted into 1 when the Boss is spawned," << endl
+        //      << "             Zombies have very high attack and life." << endl
+        //      << "             Boss has very high life and kills alien in ONE HIT." << endl << endl << endl;
+
+        cout << "  Easy      -- We'll take it easy on you." << endl
+             << endl;
+        cout << "  Medium    -- Just your average difficulty." << endl
+             << endl;
+        cout << "  Hard      -- We'll hit you with all we got." << endl
+             << endl;
+        cout << "  Nightmare -- Survive the unsurvivable." << endl
+             << endl;
+        cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl
+             << endl;
+        cout << "Please select the difficulty => ";
+        cin >> mode;
+        transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+        if ((mode != "easy" && mode != "medium" && mode != "hard" && mode != "nightmare") || cin.fail())
+        {
+            cout << "Please enter the correct difficulty !" << endl
+                 << endl;
+            system("pause");
+            error = true;
+        }
+        else
+        {
+            error = false;
+        }
+        system("cls");
+    } while (error == true);
+    return mode;
+}
 int customize(int &row, int &column, int &zombie) // Customization for row, column and zombie amount.
 {
     // Row setting.
@@ -609,6 +785,18 @@ void setting(int &row, int &column, int &zombie) // Default page and ask user fo
     }
 }
 
+string **generate2DArr(int &row, int &column) // Initialize 2D array.
+{
+    string **arr = new string *[row];
+    for (int i = 0; i < row; i++)
+    {
+        arr[i] = new string[column];
+    }
+    return arr;
+}
+
+//display functions
+
 void displayTitle(int &column, int &row) // Display ".: Alien vs Zombie :.".
 {
     if (row > 9)
@@ -753,32 +941,44 @@ void displayZombieRange(Character::Zombie &zombies, int &zombiesNo) // Display t
     cout << zombies.getRange(zombiesNo);
 }
 
-void statusBoss(Character::Zombie &zombies, string &mode) // Assign attributes for zombie boss.
+void help() // Show command list.
 {
-    if (mode == "easy") // Initialize Boss status
-    {
-        zombies.setBossLife(500);
-        zombies.setBossAttack(50);
-        zombies.setBossCD(3);
-    }
-    else if (mode == "medium")
-    {
-        zombies.setBossLife(500);
-        zombies.setBossAttack(70);
-        zombies.setBossCD(3);
-    }
-    else if (mode == "hard")
-    {
-        zombies.setBossLife(600);
-        zombies.setBossAttack(99);
-        zombies.setBossCD(3);
-    }
-    else if (mode == "nightmare")
-    {
-        zombies.setBossLife(750);
-        zombies.setBossAttack(999);
-        zombies.setBossCD(5);
-    }
+    cout << " 1. up\t\t- Move Up" << endl;
+    cout << " 2. down\t- Move Down" << endl;
+    cout << " 3. left\t- Move Left " << endl;
+    cout << " 4. right\t- Move Right" << endl;
+    cout << " 5. arrow\t- Change the direction of an arrow using row and column" << endl;
+    cout << " 6. help\t- Display the command list" << endl;
+    cout << " 7. object\t- Display the object list" << endl;
+    cout << " 8. save\t- Save the game " << endl;
+    cout << " 9. load\t- Load previous saved game" << endl;
+    cout << "10. quit\t- Exit the game" << endl;
+    cout << "11. restart\t- Restart the game" << endl;
+    return;
+}
+
+void object() // Show object list.
+{
+    cout << " 1. \'^\' \'v\' \'<\' \'>\'\t- Arrow" << endl;
+    cout << " 2. \'h\'\t\t\t- Health" << endl;
+    cout << " 3. \'p\'\t\t\t- Pod" << endl;
+    cout << " 4. \'r\'\t\t\t- Rock" << endl;
+    cout << " 5. \'@\'\t\t\t- Teleport Portal" << endl;
+    cout << " 6. \'~\'\t\t\t- Mighty Rod" << endl;
+    cout << " 7. \' \'\t\t\t- Space" << endl;
+    cout << " 8. \'.\'\t\t\t- Trail" << endl;
+    cout << " 9. \'A\'\t\t\t- Alien" << endl;
+    cout << "10. \'1\'-\'9\'\t\t- Zombie" << endl;
+    cout << "11. \'B\'\t\t\t- Zombie Boss" << endl;
+    return;
+}
+
+string commandUser(string &command) // Allow user to input command.
+{
+    cout << "command > ";
+    cin >> command;
+    cout << endl;
+    return command;
 }
 
 void displayCharacter(Character::Alien &aliens, Character::Zombie &zombies, int &zombie, bool &bossSpawn, int &turn) // Display the life, attack and range of alien and zombie.
@@ -829,12 +1029,7 @@ void displayCharacter(Character::Alien &aliens, Character::Zombie &zombies, int 
         }
         else
         {
-            // if (turn != 0)
-            // {
-            //     cout << "-> ";
-            // }
-            // else
-            // {
+
             if ((turn == zombiesNo + 1) && (zombies.getLife(zombiesNo) > 0))
             {
                 cout << "-> ";
@@ -875,41 +1070,13 @@ void displayBoard(string **arr, int &row, int &column, int &zombie, int &rowStar
     displayCharacter(aliens, zombies, zombie, bossSpawn, turn);
 }
 
-void assignZombie(int &row, int &column, int &zombie, string **arr, int **PositionZombie) // Generate zombies for the board.
-{
-    int numberAssignInt = 1;
-    int randomRow, randomColumn;
-    for (int i = 0; i < zombie; ++i)
-    {
-        do
-        {
-            randomRow = rand() % row;
-            randomColumn = rand() % column;
-        } while (arr[randomRow][randomColumn] == "A" || arr[randomRow][randomColumn] == "1" || arr[randomRow][randomColumn] == "2" || arr[randomRow][randomColumn] == "3" || arr[randomRow][randomColumn] == "4" || arr[randomRow][randomColumn] == "5" || arr[randomRow][randomColumn] == "6" || arr[randomRow][randomColumn] == "7" || arr[randomRow][randomColumn] == "8" || arr[randomRow][randomColumn] == "9");
-
-        string numberAssignStr = to_string(numberAssignInt);
-        arr[randomRow][randomColumn] = numberAssignStr;
-        PositionZombie[i][0] = randomRow; // Assign the Row and Column of each zombie in the array.
-        PositionZombie[i][1] = randomColumn;
-        numberAssignInt = numberAssignInt + 1;
-    }
-}
-
-int **ZombiePosition(int &zombie) // Store position of every zombie.
-{
-    int **PositionZombie = new int *[zombie];
-    for (int i = 0; i < zombie; i++)
-    {
-        PositionZombie[i] = new int[2];
-    }
-    return PositionZombie;
-}
+//Random Functions
 
 string randomObject() // Randomize object.
 {
     string finalObject;
-    string object[15] = {"^", "v", "<", ">", "h", "p", "r", " ", "^", "v", "<", ">", "h", "p", " "};
-    finalObject = object[rand() % 15];
+    string object[21] = {"^", "v", "<", ">", "h", "p", "r", " ", "^", "v", "<", ">", "h", "p", " ", "^", "v", "<", ">", "h", "p"};
+    finalObject = object[rand() % 21];
     // finalObject = "p";
     return finalObject;
 }
@@ -949,16 +1116,6 @@ void generateRandomTrail(string **arr, int &row, int &column, int &zombie, int &
     cout << endl;
 }
 
-string **generate2DArr(int &row, int &column) // Initialize 2D array.
-{
-    string **arr = new string *[row];
-    for (int i = 0; i < row; i++)
-    {
-        arr[i] = new string[column];
-    }
-    return arr;
-}
-
 int randomLife(string mode) // Randomize zombie life.
 {
     int finalLife;
@@ -969,15 +1126,14 @@ int randomLife(string mode) // Randomize zombie life.
     }
     else if (mode == "hard")
     {
-        int life[2] = {200, 225};
+        int life[2] = {200, 250};
         finalLife = life[rand() % 2];
     }
     else if (mode == "nightmare")
     {
-        int life[2] = {275, 300};
+        int life[2] = {350, 400};
         finalLife = life[rand() % 2];
     }
-    // finalLife = 10;
     return finalLife;
 }
 
@@ -1023,56 +1179,7 @@ int randomRange(int &row, int &column) // Randomize zombie range.
     return finalRange;
 }
 
-void generateZombie(Character::Zombie &zombies, int &zombie, int &row, int &column, string **arr, int **PositionZombie, string mode) // Generate zombies with random life, attack and range.
-{
-    for (int i = 0; i < zombie; ++i)
-    {
-        zombies.setZombie(i);
-        int zombieLife = randomLife(mode);
-        zombies.setLife(zombieLife);
-        int zombieAttack = randomAttack(mode);
-        zombies.setAttack(zombieAttack);
-        int zombieRange = randomRange(row, column);
-        zombies.setRange(zombieRange);
-    }
-    assignZombie(row, column, zombie, arr, PositionZombie);
-}
-
-void help() // Show command list.
-{
-    cout << " 1. up\t\t- Move Up" << endl;
-    cout << " 2. down\t- Move Down" << endl;
-    cout << " 3. left\t- Move Left " << endl;
-    cout << " 4. right\t- Move Right" << endl;
-    cout << " 5. arrow\t- Change the direction of an arrow using row and column" << endl;
-    cout << " 6. help\t- Display the command list" << endl;
-    cout << " 7. object\t- Display the object list" << endl;
-    cout << " 8. save\t- Save the game " << endl;
-    cout << " 9. load\t- Load previous saved game" << endl;
-    cout << "10. quit\t- exit the game" << endl;
-    return;
-}
-
-void object() // Show object list.
-{
-    cout << " 1. \'^\' \'v\' \'<\' \'>\'\t- Arrow" << endl;
-    cout << " 2. \'h\'\t\t\t- Health" << endl;
-    cout << " 3. \'p\'\t\t\t- Pod" << endl;
-    cout << " 4. \'r\'\t\t\t- Rock" << endl;
-    cout << " 5. \'@\'\t\t\t- Teleport Portal" << endl;
-    cout << " 6. \' \'\t\t\t- Space" << endl;
-    cout << " 7. \'.\'\t\t\t- Trail" << endl;
-    cout << " 8. \'A\'\t\t\t- Alien" << endl;
-    cout << " 9. \'1\'-\'9\'\t\t- Zombie" << endl;
-    cout << "10. \'B\'\t\t\t- Zombie Boss" << endl;
-    return;
-}
-
-void alienAttackZero(Character::Alien &aliens) // Reset alien attack to zero.
-{
-    aliens.clearAttack();
-    aliens.setAttack(0);
-}
+//Alien  Functions
 
 string moveUp(int &x, int &y, string **arr, string &hit, Character::Zombie &zombies) // Action for alien to move up.
 {
@@ -1266,201 +1373,25 @@ void alienAttackIncrease(Character::Alien &aliens) // Allow alien attack to accu
     aliens.setAttack(sum);
 }
 
-void effect(int &row, bool &bossSpawn) // effect when the boss is spawn and after it is defeated.
+void alienAttackZero(Character::Alien &aliens) // Reset alien attack to zero.
 {
-    string x08 = "                           ____________________                              ";
-    string x07 = "  __-@--%_-**-_ _          ____________________          @ -$_= _-=*_ #%     ";
-    string x06 = "     --__-++_-__ -%#       ____________________         *- _& - _+=-_=       ";
-    string x05 = "      #-_%-_--$#_- +-      ____________________        _ -@- ++ _ *_         ";
-    string x04 = "        _-_#=- $&* -       ____________________      - % - =+ _ -#*          ";
-    string x03 = "            -#_--+ =_@ _   ____________________    %   @# -_+-* _            ";
-    string x02 = "                _*_-+ _ &- ____________________ - _ *#-_-_+-                 ";
-    string x01 = "                   =#$%&#* ____________________ #^&^@&*                      ";
-    string x00 = "                       &#*&^$%#$*^&*%^#$%*&*%^$**#^                          ";
-
-    system("cls");
-    int count = 20;
-    for (int i = 1; i <= count; i++)
-    {
-        cout << x08 << endl;
-        Sleep(20);
-    }
-    for (int i = 1; i <= count; i++)
-    {
-        system("cls");
-        for (int j = 20; j >= i; j--)
-        {
-            cout << x08 << endl;
-        }
-        if (i > 7)
-        {
-            cout << x07 << endl;
-        }
-        if (i > 6)
-        {
-            cout << x06 << endl;
-        }
-        if (i > 5)
-        {
-            cout << x05 << endl;
-        }
-        if (i > 4)
-        {
-            cout << x04 << endl;
-        }
-        if (i > 3)
-        {
-            cout << x03 << endl;
-        }
-        if (i > 2)
-        {
-            cout << x02 << endl;
-        }
-        if (i > 1)
-        {
-            cout << x01 << endl;
-        }
-        if (i > 0)
-        {
-            cout << x00 << endl;
-        }
-        if (i == 8)
-        {
-            Sleep(200);
-            break;
-        }
-        Sleep(20);
-    }
-    if (bossSpawn == false)
-    {
-        system("cls");
-        string s01 = "             ,:;=*CYI/+++\\IL=+,";
-        string s02 = "         .;&AZOYJI**+<;:-,,-:+=+L;,";
-        string s03 = "      ,AHRKOPJ**<---,,,...,,--:\\>+IL\\,";
-        string s04 = "    ,6EHKRZFJ*</---,,,.....,,--:;\\>*IO\\,";
-        string s05 = "   ,AEHRAZOVI+<<--,,,..........,,--;=*II\\";
-        string s06 = "  ;AWHRKKXCI=/--,,,.............,,,->+*IL\\";
-        string s07 = " .HBEEHKR&I+/--,,,...............,,-:\\;*IL\\";
-        string s08 = ".;REHRKROLI*<;-,,,................,,-;>\\*IF\\";
-        string s09 = ".EHEHDSZOTJ*<\\-,,,................,,-:>=+I*L:";
-        string s10 = ".EEEHAGOPTI+\\:--,,,................,,-:>+I*II";
-        string s11 = ":EHEEBDOPJ*=<;:+-,,....,,..........,,-;/II11I";
-        string s12 = ":HEEBWADSFJI<\\<<::--,....,,,,----,,.,,:JAIIJI";
-        string s13 = ":ZKREWXRKSCI*=<<;::;::,.-:/>/;;::--,.\\/\\/KFLYT;";
-        string s14 = ".XACHWEKS*;:--6-\\:,.:;:,\\/\\/;.,;=,,,,..,IRFYT&'";
-        string s15 = "'HDWNBC/JNMMMMMMNBC+=<<;-,-JHMMNMWRA;,.HFTYT";
-        string s16 = " XANMH/JMMMMMMMMMMEHAJI*=:IMMMMMMMMMMB*YYJLT";
-        string s17 = " EBWYD1HEMMMMMMMMMBHAP*,1,HNMMMMMMMMMM:.\\TLY";
-        string s18 = " EWMZS\\SBWNMNMMMWBWEPI<.I.EBWNMMMMNMMN;.:IYL";
-        string s19 = " CBNDNE\\CHBEBEEBR/HEPT&I;:'YI&SEBWNNWB:.:LLT";
-        string s20 = " /XKAWB\\<JYNBXS/JHETMXHNL=+<-,*TWBENEP,.-LYL,";
-        string s21 = " SXRCBWBO&+*ICKHWNCBMARMMA\\<=\\*.*,,,:;1.,;I'";
-        string s22 = "  TEBWHI<*/;TRJJTBDMMXKMMEI-;*JZLZJI*=--;/Y'";
-        string s23 = "   'THCL;,.\\<:;AENCMMAGNMHI-*F;\\IJDHSI/IJF";
-        string s24 = "     :ENBWM6+*JKHEF:*TYT*I-;-\\L\\A6NHGTJIF";
-        string s25 = "      =AWHWMWYDRKY1:+:YI-I-I\\,1:MMNIRXHJ";
-        string s26 = "       XHPNMHAKZDCY<K:AI,I,I,1,\\WMMWIYI";
-        string s27 = "       KPOMMOIGLBIHCE=WI7VT-I1;7JMMBIJ'";
-        string s28 = "       XZFBNDRLIB1HLB.W1.LL,I\\I,JWH/IJ";
-        string s29 = "       OTA6BHZLIY;HTF=H-JIJII\\-1JVZ:JI";
-        string s30 = "       ZXSH&BEKLH0E1IIY-I/:1IJ=*J:/TIJ,";
-        string s31 = "       YDRETLHTTLZIJJITJLII11:\\-,.*TIJ";
-        string s32 = "        =<F&TVI6I*+/;:T:I:I-16.,:/J/-";
-        string s33 = "          'VFTLIII=\\;:JL:,...7,7JJ/";
-        string s34 = "             'TJCYJJIV/\\V,,,/,JV'";
-        string s35 = "               'TL\\:=+L.J==/JF-";
-        string s36 = "                 'TOD6X&LJF''";
-
-        for (int i = 0; i < 3; i++)
-        {
-            cout << s01 << endl;
-            cout << s02 << endl;
-            cout << s03 << endl;
-            cout << s04 << endl;
-            cout << s05 << endl;
-            cout << s06 << endl;
-            cout << s07 << endl;
-            cout << s08 << endl;
-            cout << s09 << endl;
-            cout << s10 << endl;
-            cout << s11 << endl;
-            cout << s12 << endl;
-            cout << s13 << endl;
-            cout << s14 << endl;
-            cout << s15 << endl;
-            cout << s16 << endl;
-            cout << s17 << endl;
-            cout << s18 << endl;
-            cout << s19 << endl;
-            cout << s20 << endl;
-            cout << s21 << endl;
-            cout << s22 << endl;
-            cout << s23 << endl;
-            cout << s24 << endl;
-            cout << s25 << endl;
-            cout << s26 << endl;
-            cout << s27 << endl;
-            cout << s28 << endl;
-            cout << s29 << endl;
-            cout << s30 << endl;
-            cout << s31 << endl;
-            cout << s32 << endl;
-            cout << s33 << endl;
-            cout << s34 << endl;
-            cout << s35 << endl;
-            cout << s36 << endl;
-            Sleep(400);
-            system("cls");
-            Sleep(250);
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            cout << s01 << endl;
-            cout << s02 << endl;
-            cout << s03 << endl;
-            cout << s04 << endl;
-            cout << s05 << endl;
-            cout << s06 << endl;
-            cout << s07 << endl;
-            cout << s08 << endl;
-            cout << s09 << endl;
-            cout << s10 << endl;
-            cout << s11 << endl;
-            cout << s12 << endl;
-            cout << s13 << endl;
-            cout << s14 << endl;
-            cout << s15 << endl;
-            cout << s16 << endl;
-            cout << s17 << endl;
-            cout << s18 << endl;
-            cout << s19 << endl;
-            cout << s20 << endl;
-            cout << s21 << endl;
-            cout << s22 << endl;
-            cout << s23 << endl;
-            cout << s24 << endl;
-            cout << s25 << endl;
-            cout << s26 << endl;
-            cout << s27 << endl;
-            cout << s28 << endl;
-            cout << s29 << endl;
-            cout << s30 << endl;
-            cout << s31 << endl;
-            cout << s32 << endl;
-            cout << s33 << endl;
-            cout << s34 << endl;
-            cout << s35 << endl;
-            cout << s36 << endl;
-            Sleep(100);
-            system("cls");
-            Sleep(20);
-        }
-    }
+    aliens.clearAttack();
+    aliens.setAttack(0);
 }
 
 void alienAttack(Character::Zombie &zombies, Character::Alien &aliens, string &hitZombie, int **PositionZombie, string **arr, int &x, int &y, string &lastMove, int &row, int &column, string &hit, int &zombie, bool &bossSpawn) // Allow alien to attack zombie by direct hit.
 {
     int attack = aliens.getAttack(0);
+    int criticalPercent [8] = {1, 0, 1, 0, 0, 1, 0, 1};
+    int criticalHit = criticalPercent[rand() % 8];
+    if (criticalHit == 1)     // 50% of getting critical hit.
+    {
+        cout << "++++++++++++++++++++++++++++++++++++++" << endl;
+        cout << "     Alien deals a critical hit !     " << endl;
+        cout << "++++++++++++++++++++++++++++++++++++++" << endl;
+        cout << endl;
+        attack *= 1.2;
+    }
     if (zombies.accumulateZombieLife() != 0)
     {
         int zombieNo = stoi(hitZombie);
@@ -1491,9 +1422,9 @@ void alienAttack(Character::Zombie &zombies, Character::Alien &aliens, string &h
             zombies.insertBossLife(0);
             cout << "The BOSS is defeated." << endl
                  << endl;
-            cout << "=================================================" << endl;
-            cout << "BOSS : NO ! That's impossible ! NO........" << endl;
-            cout << "=================================================" << endl;
+            cout << "================================================" << endl;
+            cout << "   BOSS : NO ! That's impossible ! NO........" << endl;
+            cout << "================================================" << endl;
             for (int i = 0; i < row; i++) // Replace the Boss's position with alien
             {
                 for (int j = 0; j < column; j++)
@@ -1514,7 +1445,7 @@ void alienAttack(Character::Zombie &zombies, Character::Alien &aliens, string &h
             cout << "The BOSS survived the attack." << endl
                  << endl;
             cout << "=================================================" << endl;
-            cout << "BOSS : " << speech[rand() % 5] << endl;
+            cout << "   BOSS : " << speech[rand() % 5] << endl;
             cout << "=================================================" << endl;
             lastMove = "B";
         }
@@ -1620,19 +1551,36 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
             {
                 if (moveZombie == "y")
                 {
+                    system("cls");
+                    displayBoard(arr, row, column, zombie, rowStart, aliens, zombies, bossSpawn, turn);
                     int zombieNo;
                     string zombieMoveDirection;
-                    cout << "Choose your desire zombie to move its position by one (ex: 1 right): ";
-                    cin >> zombieNo >> zombieMoveDirection;
+                    bool validInput = false;
+                    while (!validInput)
+                    {
+                        cout << "Choose your desire zombie to move its position by one (ex: 1 right): ";
+                        if (cin >> zombieNo >> zombieMoveDirection)
+                        {
+                            validInput = true; // input is valid
+                        }
+                        else
+                        {
+                            cout << "Invalid input. Please enter an integer and a string ^^";
+                            cout << endl;
+                            cin.clear();
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the input buffer
+                        }
+                    }
                     transform(zombieMoveDirection.begin(), zombieMoveDirection.end(), zombieMoveDirection.begin(), ::tolower);
-                    int currentPosition[2];
+                    int currentPosition[2];                               // current positon array
                     currentPosition[0] = PositionZombie[zombieNo - 1][0]; // row
                     currentPosition[1] = PositionZombie[zombieNo - 1][1]; // column
                     // cout <<"current zombie position row and column: "<< currentPosition[0] << " " << currentPosition[1] << endl; testing purpose;
                     if (zombieNo > 0 && zombieNo <= zombies.sizeZombie() && (zombieMoveDirection == "right" || zombieMoveDirection == "left" || zombieMoveDirection == "up" || zombieMoveDirection == "down"))
                     {
-                        if (zombieMoveDirection == "right" && PositionZombie[zombieNo - 1][1] < column - 1)
+                        if (zombieMoveDirection == "right" && PositionZombie[zombieNo - 1][1] < column - 1 && arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1] + 1] != "A")
                         {
+
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = randomObject();
                             PositionZombie[zombieNo - 1][1] += 1;
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = to_string(zombieNo);
@@ -1644,8 +1592,9 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
                             cout << endl;
                             system("PAUSE");
                         }
-                        else if (zombieMoveDirection == "left" && PositionZombie[zombieNo - 1][1] > 0)
+                        else if (zombieMoveDirection == "left" && PositionZombie[zombieNo - 1][1] > 0 && arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1] - 1] != "A")
                         {
+
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = randomObject();
                             PositionZombie[zombieNo - 1][1] -= 1;
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = to_string(zombieNo);
@@ -1657,7 +1606,7 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
                             cout << endl;
                             system("PAUSE");
                         }
-                        else if (zombieMoveDirection == "up" && PositionZombie[zombieNo - 1][0] > 0)
+                        else if (zombieMoveDirection == "up" && PositionZombie[zombieNo - 1][0] > 0 && arr[PositionZombie[zombieNo - 1][0] - 1][PositionZombie[zombieNo - 1][1]] != "A")
                         {
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = randomObject();
                             PositionZombie[zombieNo - 1][0] -= 1;
@@ -1670,8 +1619,9 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
                             cout << endl;
                             system("PAUSE");
                         }
-                        else if (zombieMoveDirection == "down" && PositionZombie[zombieNo - 1][0] < row - 1)
+                        else if (zombieMoveDirection == "down" && PositionZombie[zombieNo - 1][0] < row - 1 && arr[PositionZombie[zombieNo - 1][0] + 1][PositionZombie[zombieNo - 1][1]] != "A")
                         {
+
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = randomObject();
                             PositionZombie[zombieNo - 1][0] += 1;
                             arr[PositionZombie[zombieNo - 1][0]][PositionZombie[zombieNo - 1][1]] = to_string(zombieNo);
@@ -1688,7 +1638,7 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
                             system("CLS");
                             displayBoard(arr, row, column, zombie, rowStart, aliens, zombies, bossSpawn, turn);
                             cout << "==================================" << endl;
-                            cout << "   Zombie " << zombieNo << ": Am I even moving?" << endl;
+                            cout << "   Zombie " << zombieNo << ": Did you made the right move??" << endl;
                             cout << "==================================" << endl;
                             cout << endl;
                             system("PAUSE");
@@ -1723,8 +1673,6 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
         cout << "Alien found a pod!" << endl;
         if (zombies.accumulateZombieLife() != 0)
         {
-            // cout << findClosestZombie(row, column, arr, PositionZombie, zombie, zombies) << endl;
-            // system("pause");
             int closestZombie = std::stoi(findClosestZombie(row, column, arr, PositionZombie, zombie, zombies));
             if (closestZombie != 0)
             {
@@ -1874,6 +1822,125 @@ void hitObject(string &hit, Character::Alien &aliens, Character::Zombie &zombies
     }
 }
 
+void changeArrow(string **arr, int &row, int &column) // Allow user to change the direction of selected arrow.
+{
+    int x;
+    int y;
+    string updatedDirection;
+    int error;
+    do
+    {
+        error = 0;
+        cout << "Enter row, column and direction (ex: 1 2 left): ";
+        cin >> x >> y >> updatedDirection;
+        transform(updatedDirection.begin(), updatedDirection.end(), updatedDirection.begin(), ::tolower);
+        if (((x == cin.fail() || y == cin.fail()) || (x > row || x < 1 || y > column || y < 1) || (arr[x - 1][y - 1] != "^" && arr[x - 1][y - 1] != "v" && arr[x - 1][y - 1] != "<" && arr[x - 1][y - 1] != ">")) && (updatedDirection != "up" && updatedDirection != "down" && updatedDirection != "left" && updatedDirection != "right")) // Check invalid coordinate and direction.
+        {
+            cout << "Please enter a valid coordinate and direction." << endl;
+            error = 1;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else if (x == cin.fail() || y == cin.fail()) // Check invalid coordinate.
+        {
+            cout << "Please enter a valid coordinate." << endl;
+            error = 1;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else if (x > row || x < 1 || y > column || y < 1) // Check invalid coordinate.
+        {
+            cout << "Please enter a valid coordinate." << endl;
+            error = 1;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else if (arr[x - 1][y - 1] != "^" && arr[x - 1][y - 1] != "v" && arr[x - 1][y - 1] != "<" && arr[x - 1][y - 1] != ">") // Check invalid coordinate.
+        {
+            cout << "Please enter a valid coordinate." << endl;
+            error = 1;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        else if (updatedDirection != "up" && updatedDirection != "down" && updatedDirection != "left" && updatedDirection != "right" || updatedDirection == "left" && arr[x - 1][y - 1] == "<" || updatedDirection == "right" && arr[x - 1][y - 1] == ">" || updatedDirection == "up" && arr[x - 1][y - 1] == "^" || updatedDirection == "down" && arr[x - 1][y - 1] == "v") // Check invalid direction.
+        {
+
+            cout << "Please enter a valid direction or new direction." << endl;
+            error = 1;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    } while (error == 1);
+    if (updatedDirection == "up")
+    {
+        updatedDirection = "^";
+    }
+    else if (updatedDirection == "down")
+    {
+        updatedDirection = "v";
+    }
+    else if (updatedDirection == "left")
+    {
+        updatedDirection = "<";
+    }
+    else if (updatedDirection == "right")
+    {
+        updatedDirection = ">";
+    }
+    string z = arr[x - 1][y - 1];
+    arr[x - 1][y - 1] = updatedDirection;
+    cout << "Arrow " << z << " is switched to " << updatedDirection << "." << endl;
+    cout << endl;
+    system("PAUSE");
+}
+
+//Zombie Functions
+
+void assignZombie(int &row, int &column, int &zombie, string **arr, int **PositionZombie) // Generate zombies for the board.
+{
+    int numberAssignInt = 1;
+    int randomRow, randomColumn;
+    for (int i = 0; i < zombie; ++i)
+    {
+        do
+        {
+            randomRow = rand() % row;
+            randomColumn = rand() % column;
+        } while (arr[randomRow][randomColumn] == "A" || arr[randomRow][randomColumn] == "1" || arr[randomRow][randomColumn] == "2" || arr[randomRow][randomColumn] == "3" || arr[randomRow][randomColumn] == "4" || arr[randomRow][randomColumn] == "5" || arr[randomRow][randomColumn] == "6" || arr[randomRow][randomColumn] == "7" || arr[randomRow][randomColumn] == "8" || arr[randomRow][randomColumn] == "9");
+
+        string numberAssignStr = to_string(numberAssignInt);
+        arr[randomRow][randomColumn] = numberAssignStr;
+        PositionZombie[i][0] = randomRow; // Assign the Row and Column of each zombie in the array.
+        PositionZombie[i][1] = randomColumn;
+        numberAssignInt = numberAssignInt + 1;
+    }
+}
+
+void generateZombie(Character::Zombie &zombies, int &zombie, int &row, int &column, string **arr, int **PositionZombie, string mode) // Generate zombies with random life, attack and range.
+{
+    for (int i = 0; i < zombie; ++i)
+    {
+        zombies.setZombie(i);
+        int zombieLife = randomLife(mode);
+        zombies.setLife(zombieLife);
+        int zombieAttack = randomAttack(mode);
+        zombies.setAttack(zombieAttack);
+        int zombieRange = randomRange(row, column);
+        zombies.setRange(zombieRange);
+    }
+    assignZombie(row, column, zombie, arr, PositionZombie);
+}
+
+int **ZombiePosition(int &zombie) // Store position of every zombie.
+{
+    int **PositionZombie = new int *[zombie];
+    for (int i = 0; i < zombie; i++)
+    {
+        PositionZombie[i] = new int[2];
+    }
+    return PositionZombie;
+}
+
 void zombieAttack(Character::Zombie &zombies, Character::Alien &aliens, int **PositionZombie, int &i, string **arr, int &row, int &column) // Zombie detect and attack alien if nearby.
 {
     bool attack = false;
@@ -1965,7 +2032,7 @@ void zombieMove(Character::Zombie &zombies, Character::Alien &aliens, int &row, 
         if (move == "up")
         { // Movement depend on direcction move.
             cout << "Zombie " << i + 1 << " moves up." << endl;
-            if (PositionZombie[i][0] > 0 && arr[PositionZombie[i][0] - 1][PositionZombie[i][1]] != "A" && arr[PositionZombie[i][0] - 1][PositionZombie[i][1]] != "r") // Prevent hit the border, the alien and the rock.
+            if (PositionZombie[i][0] > 0 && arr[PositionZombie[i][0] - 1][PositionZombie[i][1]] != "A" && arr[PositionZombie[i][0] - 1][PositionZombie[i][1]] != "r" && arr[PositionZombie[i][0] - 1][PositionZombie[i][1]] != "~") // Prevent hit the border, the alien and the rock.
             {
                 for (int j = 1; j <= zombies.sizeZombie(); j++)
                 {
@@ -1985,7 +2052,7 @@ void zombieMove(Character::Zombie &zombies, Character::Alien &aliens, int &row, 
         else if (move == "down")
         {
             cout << "Zombie " << i + 1 << " moves down." << endl;
-            if (PositionZombie[i][0] < row - 1 && arr[PositionZombie[i][0] + 1][PositionZombie[i][1]] != "A" && arr[PositionZombie[i][0] + 1][PositionZombie[i][1]] != "r")
+            if (PositionZombie[i][0] < row - 1 && arr[PositionZombie[i][0] + 1][PositionZombie[i][1]] != "A" && arr[PositionZombie[i][0] + 1][PositionZombie[i][1]] != "r" && arr[PositionZombie[i][0] + 1][PositionZombie[i][1]] != "~")
             {
                 for (int j = 1; j <= zombies.sizeZombie(); j++)
                 {
@@ -2005,7 +2072,7 @@ void zombieMove(Character::Zombie &zombies, Character::Alien &aliens, int &row, 
         else if (move == "left")
         {
             cout << "Zombie " << i + 1 << " moves left." << endl;
-            if (PositionZombie[i][1] > 0 && arr[PositionZombie[i][0]][PositionZombie[i][1] - 1] != "A" && arr[PositionZombie[i][0]][PositionZombie[i][1] - 1] != "r")
+            if (PositionZombie[i][1] > 0 && arr[PositionZombie[i][0]][PositionZombie[i][1] - 1] != "A" && arr[PositionZombie[i][0]][PositionZombie[i][1] - 1] != "r" && arr[PositionZombie[i][0]][PositionZombie[i][1] - 1] != "~")
             {
                 for (int j = 1; j <= zombies.sizeZombie(); j++)
                 {
@@ -2025,7 +2092,7 @@ void zombieMove(Character::Zombie &zombies, Character::Alien &aliens, int &row, 
         else
         {
             cout << "Zombie " << i + 1 << " moves right." << endl;
-            if (PositionZombie[i][1] < column - 1 && arr[PositionZombie[i][0]][PositionZombie[i][1] + 1] != "A" && arr[PositionZombie[i][0]][PositionZombie[i][1] + 1] != "r")
+            if (PositionZombie[i][1] < column - 1 && arr[PositionZombie[i][0]][PositionZombie[i][1] + 1] != "A" && arr[PositionZombie[i][0]][PositionZombie[i][1] + 1] != "r" && arr[PositionZombie[i][0]][PositionZombie[i][1] + 1] != "~")
             {
                 for (int j = 1; j <= zombies.sizeZombie(); j++)
                 {
@@ -2056,6 +2123,36 @@ void zombieMove(Character::Zombie &zombies, Character::Alien &aliens, int &row, 
         turn = turn + 1;
         cout << endl;
         system("PAUSE");
+    }
+}
+
+//Additional Features
+
+void statusBoss(Character::Zombie &zombies, string &mode) // Assign attributes for zombie boss.
+{
+    if (mode == "easy") // Initialize Boss status
+    {
+        zombies.setBossLife(500);
+        zombies.setBossAttack(50);
+        zombies.setBossCD(3);
+    }
+    else if (mode == "medium")
+    {
+        zombies.setBossLife(650);
+        zombies.setBossAttack(70);
+        zombies.setBossCD(3);
+    }
+    else if (mode == "hard")
+    {
+        zombies.setBossLife(800);
+        zombies.setBossAttack(99);
+        zombies.setBossCD(3);
+    }
+    else if (mode == "nightmare")
+    {
+        zombies.setBossLife(1000);
+        zombies.setBossAttack(999);
+        zombies.setBossCD(5);
     }
 }
 
@@ -2131,134 +2228,6 @@ void Boss(Character::Alien &aliens, Character::Zombie &zombies, string **arr, in
         zombies.eraseBossCD();
         zombies.insertBossCD(CD);
     }
-}
-
-string difficulty() // Menu for user to choose difficulty.
-{
-    string mode;
-    bool error = false;
-    do
-    {
-        cout << "                   Difficulty                  " << endl
-             << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-        // cout << "Easy      -- Alien revive 30 health when the Boss is spawned," << endl
-        //      << "             Boss has lower attack and normal health" << endl << endl;
-        // cout << "Medium    -- Alien's life deducted into 30 when the Boss is spawned," << endl
-        //      << "             Boss has normal attack and health." << endl << endl;
-        // cout << "Hard      -- Alien's life deducted into 1 when the Boss is spawned," << endl
-        //      << "             Zombies have higher attack and life." << endl
-        //      << "             Boss has very high attack and higher life." << endl << endl;
-        // cout << "Nightmare -- Alien's life deducted into 1 when the Boss is spawned," << endl
-        //      << "             Zombies have very high attack and life." << endl
-        //      << "             Boss has very high life and kills alien in ONE HIT." << endl << endl << endl;
-
-        cout << "  Easy      -- We'll take it easy on you." << endl
-             << endl;
-        cout << "  Medium    -- Just your average difficulty." << endl
-             << endl;
-        cout << "  Hard      -- We'll hit you with all we got." << endl
-             << endl;
-        cout << "  Nightmare -- Survive the unsurvivable." << endl
-             << endl;
-        cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl
-             << endl;
-        cout << "Please select the difficulty => ";
-        cin >> mode;
-        transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
-        if ((mode != "easy" && mode != "medium" && mode != "hard" && mode != "nightmare") || cin.fail())
-        {
-            cout << "Please enter the correct difficulty !" << endl
-                 << endl;
-            system("pause");
-            error = true;
-        }
-        else
-        {
-            error = false;
-        }
-        system("cls");
-    } while (error == true);
-    return mode;
-}
-
-string commandUser(string &command) // Allow user to input command.
-{
-    cout << "command > ";
-    cin >> command;
-    cout << endl;
-    return command;
-}
-
-void changeArrow(string **arr, int &row, int &column) // Allow user to change the direction of selected arrow.
-{
-    int x;
-    int y;
-    string updatedDirection;
-    int error;
-    do
-    {
-        error = 0;
-        cout << "Enter row, column and direction (ex: 1 2 left): ";
-        cin >> x >> y >> updatedDirection;
-        transform(updatedDirection.begin(), updatedDirection.end(), updatedDirection.begin(), ::tolower);
-        if (((x == cin.fail() || y == cin.fail()) || (x > row || x < 1 || y > column || y < 1) || (arr[x - 1][y - 1] != "^" && arr[x - 1][y - 1] != "v" && arr[x - 1][y - 1] != "<" && arr[x - 1][y - 1] != ">")) && (updatedDirection != "up" && updatedDirection != "down" && updatedDirection != "left" && updatedDirection != "right")) // Check invalid coordinate and direction.
-        {
-            cout << "Please enter a valid coordinate and direction." << endl;
-            error = 1;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else if (x == cin.fail() || y == cin.fail()) // Check invalid coordinate.
-        {
-            cout << "Please enter a valid coordinate." << endl;
-            error = 1;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else if (x > row || x < 1 || y > column || y < 1) // Check invalid coordinate.
-        {
-            cout << "Please enter a valid coordinate." << endl;
-            error = 1;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else if (arr[x - 1][y - 1] != "^" && arr[x - 1][y - 1] != "v" && arr[x - 1][y - 1] != "<" && arr[x - 1][y - 1] != ">") // Check invalid coordinate.
-        {
-            cout << "Please enter a valid coordinate." << endl;
-            error = 1;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else if (updatedDirection != "up" && updatedDirection != "down" && updatedDirection != "left" && updatedDirection != "right" || updatedDirection == "left" && arr[x - 1][y - 1] == "<" || updatedDirection == "right" && arr[x - 1][y - 1] == ">" || updatedDirection == "up" && arr[x - 1][y - 1] == "^" || updatedDirection == "down" && arr[x - 1][y - 1] == "v") // Check invalid direction.
-        {
-
-            cout << "Please enter a valid direction or new direction." << endl;
-            error = 1;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-    } while (error == 1);
-    if (updatedDirection == "up")
-    {
-        updatedDirection = "^";
-    }
-    else if (updatedDirection == "down")
-    {
-        updatedDirection = "v";
-    }
-    else if (updatedDirection == "left")
-    {
-        updatedDirection = "<";
-    }
-    else if (updatedDirection == "right")
-    {
-        updatedDirection = ">";
-    }
-    string z = arr[x - 1][y - 1];
-    arr[x - 1][y - 1] = updatedDirection;
-    cout << "Arrow " << z << " is switched to " << updatedDirection << "." << endl;
-    cout << endl;
-    system("PAUSE");
 }
 
 void GameOver() // Animation for game over.
@@ -2456,7 +2425,7 @@ void assignSpecialAttribute(string **arr, int &row, int &column, bool &specialAt
     }
 }
 
-void removeSpecialAttribute(string **arr, int &row, int &column, bool &specialAttribute) // Remove all portals on the board.
+void removeSpecialAttribute(string **arr, int &row, int &column, bool &specialA) // Remove all portals on the board.
 {
     for (int i = 0; i < row; ++i)
     {
@@ -2468,7 +2437,199 @@ void removeSpecialAttribute(string **arr, int &row, int &column, bool &specialAt
             }
         }
     }
-    specialAttribute = false;
+    specialA = false;
+}
+
+void effect(int &row, bool &bossSpawn) // effect when the boss is spawn and after it is defeated.
+{
+    string x08 = "                           ____________________                              ";
+    string x07 = "  __-@--%_-**-_ _          ____________________          @ -$_= _-=*_ #%     ";
+    string x06 = "     --__-++_-__ -%#       ____________________         *- _& - _+=-_=       ";
+    string x05 = "      #-_%-_--$#_- +-      ____________________        _ -@- ++ _ *_         ";
+    string x04 = "        _-_#=- $&* -       ____________________      - % - =+ _ -#*          ";
+    string x03 = "            -#_--+ =_@ _   ____________________    %   @# -_+-* _            ";
+    string x02 = "                _*_-+ _ &- ____________________ - _ *#-_-_+-                 ";
+    string x01 = "                   =#$%&#* ____________________ #^&^@&*                      ";
+    string x00 = "                       &#*&^$%#$*^&*%^#$%*&*%^$**#^                          ";
+
+    system("cls");
+    int count = 28;
+    for (int i = 1; i <= count; i++)
+    {
+        cout << x08 << endl;
+        Sleep(20);
+    }
+    for (int i = 1; i <= count; i++)
+    {
+        system("cls");
+        for (int j = 28; j >= i; j--)
+        {
+            cout << x08 << endl;
+        }
+        if (i > 7)
+        {
+            cout << x07 << endl;
+        }
+        if (i > 6)
+        {
+            cout << x06 << endl;
+        }
+        if (i > 5)
+        {
+            cout << x05 << endl;
+        }
+        if (i > 4)
+        {
+            cout << x04 << endl;
+        }
+        if (i > 3)
+        {
+            cout << x03 << endl;
+        }
+        if (i > 2)
+        {
+            cout << x02 << endl;
+        }
+        if (i > 1)
+        {
+            cout << x01 << endl;
+        }
+        if (i > 0)
+        {
+            cout << x00 << endl;
+        }
+        if (i == 8)
+        {
+            Sleep(200);
+            break;
+        }
+        Sleep(20);
+    }
+    if (bossSpawn == false)
+    {
+        system("cls");
+        string s01 = "             ,:;=*CYI/+++\\IL=+,";
+        string s02 = "         .;&AZOYJI**+<;:-,,-:+=+L;,";
+        string s03 = "      ,AHRKOPJ**<---,,,...,,--:\\>+IL\\,";
+        string s04 = "    ,6EHKRZFJ*</---,,,.....,,--:;\\>*IO\\,";
+        string s05 = "   ,AEHRAZOVI+<<--,,,..........,,--;=*II\\";
+        string s06 = "  ;AWHRKKXCI=/--,,,.............,,,->+*IL\\";
+        string s07 = " .HBEEHKR&I+/--,,,...............,,-:\\;*IL\\";
+        string s08 = ".;REHRKROLI*<;-,,,................,,-;>\\*IF\\";
+        string s09 = ".EHEHDSZOTJ*<\\-,,,................,,-:>=+I*L:";
+        string s10 = ".EEEHAGOPTI+\\:--,,,................,,-:>+I*II";
+        string s11 = ":EHEEBDOPJ*=<;:+-,,....,,..........,,-;/II11I";
+        string s12 = ":HEEBWADSFJI<\\<<::--,....,,,,----,,.,,:JAIIJI";
+        string s13 = ":ZKREWXRKSCI*=<<;::;::,.-:/>/;;::--,.\\/\\/KFLYT;";
+        string s14 = ".XACHWEKS*;:--6-\\:,.:;:,\\/\\/;.,;=,,,,..,IRFYT&'";
+        string s15 = "'HDWNBC/JNMMMMMMNBC+=<<;-,-JHMMNMWRA;,.HFTYT";
+        string s16 = " XANMH/JMMMMMMMMMMEHAJI*=:IMMMMMMMMMMB*YYJLT";
+        string s17 = " EBWYD1HEMMMMMMMMMBHAP*,1,HNMMMMMMMMMM:.\\TLY";
+        string s18 = " EWMZS\\SBWNMNMMMWBWEPI<.I.EBWNMMMMNMMN;.:IYL";
+        string s19 = " CBNDNE\\CHBEBEEBR/HEPT&I;:'YI&SEBWNNWB:.:LLT";
+        string s20 = " /XKAWB\\<JYNBXS/JHETMXHNL=+<-,*TWBENEP,.-LYL,";
+        string s21 = " SXRCBWBO&+*ICKHWNCBMARMMA\\<=\\*.*,,,:;1.,;I'";
+        string s22 = "  TEBWHI<*/;TRJJTBDMMXKMMEI-;*JZLZJI*=--;/Y'";
+        string s23 = "   'THCL;,.\\<:;AENCMMAGNMHI-*F;\\IJDHSI/IJF";
+        string s24 = "     :ENBWM6+*JKHEF:*TYT*I-;-\\L\\A6NHGTJIF";
+        string s25 = "      =AWHWMWYDRKY1:+:YI-I-I\\,1:MMNIRXHJ";
+        string s26 = "       XHPNMHAKZDCY<K:AI,I,I,1,\\WMMWIYI";
+        string s27 = "       KPOMMOIGLBIHCE=WI7VT-I1;7JMMBIJ'";
+        string s28 = "       XZFBNDRLIB1HLB.W1.LL,I\\I,JWH/IJ";
+        string s29 = "       OTA6BHZLIY;HTF=H-JIJII\\-1JVZ:JI";
+        string s30 = "       ZXSH&BEKLH0E1IIY-I/:1IJ=*J:/TIJ,";
+        string s31 = "       YDRETLHTTLZIJJITJLII11:\\-,.*TIJ";
+        string s32 = "        =<F&TVI6I*+/;:T:I:I-16.,:/J/-";
+        string s33 = "          'VFTLIII=\\;:JL:,...7,7JJ/";
+        string s34 = "             'TJCYJJIV/\\V,,,/,JV'";
+        string s35 = "               'TL\\:=+L.J==/JF-";
+        string s36 = "                 'TOD6X&LJF''";
+
+        for (int i = 0; i < 3; i++)
+        {
+            cout << s01 << endl;
+            cout << s02 << endl;
+            cout << s03 << endl;
+            cout << s04 << endl;
+            cout << s05 << endl;
+            cout << s06 << endl;
+            cout << s07 << endl;
+            cout << s08 << endl;
+            cout << s09 << endl;
+            cout << s10 << endl;
+            cout << s11 << endl;
+            cout << s12 << endl;
+            cout << s13 << endl;
+            cout << s14 << endl;
+            cout << s15 << endl;
+            cout << s16 << endl;
+            cout << s17 << endl;
+            cout << s18 << endl;
+            cout << s19 << endl;
+            cout << s20 << endl;
+            cout << s21 << endl;
+            cout << s22 << endl;
+            cout << s23 << endl;
+            cout << s24 << endl;
+            cout << s25 << endl;
+            cout << s26 << endl;
+            cout << s27 << endl;
+            cout << s28 << endl;
+            cout << s29 << endl;
+            cout << s30 << endl;
+            cout << s31 << endl;
+            cout << s32 << endl;
+            cout << s33 << endl;
+            cout << s34 << endl;
+            cout << s35 << endl;
+            cout << s36 << endl;
+            Sleep(400);
+            system("cls");
+            Sleep(250);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            cout << s01 << endl;
+            cout << s02 << endl;
+            cout << s03 << endl;
+            cout << s04 << endl;
+            cout << s05 << endl;
+            cout << s06 << endl;
+            cout << s07 << endl;
+            cout << s08 << endl;
+            cout << s09 << endl;
+            cout << s10 << endl;
+            cout << s11 << endl;
+            cout << s12 << endl;
+            cout << s13 << endl;
+            cout << s14 << endl;
+            cout << s15 << endl;
+            cout << s16 << endl;
+            cout << s17 << endl;
+            cout << s18 << endl;
+            cout << s19 << endl;
+            cout << s20 << endl;
+            cout << s21 << endl;
+            cout << s22 << endl;
+            cout << s23 << endl;
+            cout << s24 << endl;
+            cout << s25 << endl;
+            cout << s26 << endl;
+            cout << s27 << endl;
+            cout << s28 << endl;
+            cout << s29 << endl;
+            cout << s30 << endl;
+            cout << s31 << endl;
+            cout << s32 << endl;
+            cout << s33 << endl;
+            cout << s34 << endl;
+            cout << s35 << endl;
+            cout << s36 << endl;
+            Sleep(100);
+            system("cls");
+            Sleep(20);
+        }
+    }
 }
 
 int main()
@@ -2506,15 +2667,17 @@ int main()
         generate = false;
     }
     generateZombie(zombies, zombie, row, column, arr, PositionZombie, mode);
-    assignSpecialAttribute(arr, row, column, specialAttribute);
     string command;
     while (exit != true)
     {
         turn = 0;
         cout << arr[x][y] << endl;
         system("CLS");
+        if (bossSpawn == false)
+        {
+            assignSpecialAttribute(arr, row, column, specialAttribute);
+        }
         assignPortal(arr, row, column, portal);
-
         displayBoard(arr, row, column, zombie, rowStart, aliens, zombies, bossSpawn, turn);
         commandUser(command);
         transform(command.begin(), command.end(), command.begin(), ::tolower);
@@ -2582,6 +2745,7 @@ int main()
                 displayBoard(arr, row, column, zombie, rowStart, aliens, zombies, bossSpawn, turn);
                 generateRandomTrail(arr, row, column, zombie, rowStart, aliens, zombies);
                 system("PAUSE");
+                removeSpecialAttribute(arr, row, column, specialAttribute);
                 removePortal(arr, row, column, portal);
                 zombieMove(zombies, aliens, row, column, arr, PositionZombie, rowStart, zombie, bossSpawn, turn);
             }
@@ -2589,12 +2753,7 @@ int main()
             {
                 effect(row, bossSpawn);
             }
-            // system("CLS");
-            // displayBoard(arr, row, column, zombie, rowStart, aliens, zombies, bossSpawn, turn);
-            // generateRandomTrail(arr, row, column, zombie, rowStart, aliens, zombies);
-            // system("PAUSE");
-            // removePortal(arr, row, column, portal);
-            // zombieMove(zombies, aliens, row, column, arr, PositionZombie, rowStart, zombie, bossSpawn, turn);
+
             if (zombies.accumulateZombieLife() == 0 && zombies.getBossLife(0) != 0)
             {
                 Boss(aliens, zombies, arr, row, column, bossSpawn, zombie, rowStart, turn, mode);
@@ -2728,7 +2887,7 @@ int main()
                 file.close();
             }
             // Need to save bossCD, bossLife, bossAttack and bossSpawn
-            save(aliens, zombies, column, row, arr, PositionZombie, x, y, saveFileName);
+            save(aliens, zombies,mode, column, row, arr, PositionZombie, x, y, bossSpawn, saveFileName);
 
             cout << "Game saved!" << endl;
             system("PAUSE");
@@ -2759,7 +2918,7 @@ int main()
                         system("pause");
                         file.close();
                     }
-                    save(aliens, zombies, column, row, arr, PositionZombie, x, y, saveFileName);
+                    save(aliens, zombies,mode, column, row, arr, PositionZombie, x, y,bossSpawn, saveFileName);
                     cout << endl;
                     break;
                 }
@@ -2781,6 +2940,7 @@ int main()
                 file.open(loadFileName);
                 if (file.is_open()) // if the desired load file is in the directory
                 {
+                    mode = getSavedMode(loadFileName);
                     row = getSavedRow(loadFileName);
                     column = getSavedColumn(loadFileName);
                     arr = getSavedArray(loadFileName);
@@ -2793,6 +2953,10 @@ int main()
                     zombies.replacedSavedRange(getSavedZombieRange(loadFileName));
                     zombie = zombies.sizeZombie();
                     PositionZombie = getSavedPositionZombie(loadFileName);
+                    bossSpawn = getSavedBossSpawn(loadFileName);
+                    zombies.replacedSavedBossLife(getSavedBossLife(loadFileName));
+                    zombies.replacedSavedBossAttack(getSavedBossAttack(loadFileName));
+                    zombies.replacedSavedBossCD(getSavedBossCD(loadFileName));
                     x = getSavedAlienPositionX(loadFileName);
                     y = getSavedAlienPositionY(loadFileName);
                     break;
@@ -2814,6 +2978,8 @@ int main()
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             system("PAUSE");
             main();
+            exit = true;
+            break;
         }
         else
         {

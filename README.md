@@ -2,7 +2,7 @@
 
 ![Signature screenshot](screenshot1.png)
 
-This is the link of the demo (https://youtu.be/N-zW7AZEOGs).
+This is the link of the demo (https://youtube.com/playlist?list=PLHnyQ9de_gVoJPu0rF4l9zZJpZMrdI7YJ).
 
 ## Compilation Instructions
 
